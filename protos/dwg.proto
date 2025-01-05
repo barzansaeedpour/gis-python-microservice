@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package file;
+
+message FileChunk {
+    bytes data = 1;
+    int32 index = 2;
+}
+
+message UploadResponse {
+    enum Status {
+        SUCCESS = 0;
+        FAILURE = 1;
+    }
+    Status status = 1;
+}
+
+service FileService {
+    rpc Upload(stream FileChunk) returns (UploadResponse);
+}
+
+
+
+// python -m grpc_tools.protoc -I./protos --python_out=./protos --grpc_python_out=./protos protos/dwg.proto
+// python -m grpc_tools.protoc -I./protos --python_out=. --grpc_python_out=. protos/dwg.proto
+
+
