@@ -23,7 +23,9 @@ COPY input/ ./input/
 COPY convert.py ./
 
 # Run the conversion script
-CMD ["wine", "python3", "convert.py"]
+# CMD ["wine", "python3", "convert.py"]
+CMD ["python3", "convert.py"]
 
 
 # docker build -t odaconverter .
+# docker run -v "./input:/app/input" -v "./output:/app/output" odaconverter
