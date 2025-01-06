@@ -7,17 +7,23 @@ message FileChunk {
     int32 index = 2;
 }
 
+message ConvertedFile {
+    string filename = 1;
+    bytes data = 2;
+}
+
 message UploadResponse {
     enum Status {
         SUCCESS = 0;
         FAILURE = 1;
     }
-    Status status = 1;
+    repeated ConvertedFile files = 2;
 }
 
 service FileService {
     rpc Upload(stream FileChunk) returns (UploadResponse);
 }
+
 
 
 
