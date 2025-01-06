@@ -1,1 +1,12 @@
 env/
+**.dwg
+**.dxf
+**.dbf
+**.cpg
+**.prj
+**.shp
+**.shx
+**.sbn
+**.sbx
+**.shp
+**.shx

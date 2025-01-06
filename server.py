@@ -29,9 +29,6 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         data = gpd.read_file("./output/file.dxf")
         data['geom_type'] = data.geometry.type
         data.set_crs(epsg=4326, inplace=True)
-        bounding_box = data.total_bounds  # Returns (minx, miny, maxx, maxy)
-        min_x, min_y, max_x, max_y = bounding_box
-        print(f"Bounding Box: {bounding_box}")
         bounding_box_polygon = box(637000, 3902000, 672000, 3919000)
         cropped_data = data[data.geometry.intersects(bounding_box_polygon)]
         data_lines = cropped_data[cropped_data['geom_type'] == 'LineString']
@@ -54,7 +51,13 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         return dwg_pb2.UploadResponse(status=dwg_pb2.UploadResponse.SUCCESS, files=converted_files)
 
 def serve():
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+    server = grpc.server(
+        futures.ThreadPoolExecutor(max_workers=10),
+        options=[
+            ('grpc.max_send_message_length', 50 * 1024 * 1024),  # 50 MB
+            ('grpc.max_receive_message_length', 50 * 1024 * 1024),  # 50 MB
+        ]
+    )
     dwg_pb2_grpc.add_FileServiceServicer_to_server(FileService(), server)
     server.add_insecure_port('[::]:50051')
     server.start()

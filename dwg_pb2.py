@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tdwg.proto\x12\x04\x66ile\"(\n\tFileChunk\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05index\x18\x02 \x01(\x05\"a\n\x0eUploadResponse\x12+\n\x06status\x18\x01 \x01(\x0e\x32\x1b.file.UploadResponse.Status\"\"\n\x06Status\x12\x0b\n\x07SUCCESS\x10\x00\x12\x0b\n\x07\x46\x41ILURE\x10\x01\x32@\n\x0b\x46ileService\x12\x31\n\x06Upload\x12\x0f.file.FileChunk\x1a\x14.file.UploadResponse(\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\tdwg.proto\x12\x04\x66ile\"(\n\tFileChunk\x12\x0c\n\x04\x64\x61ta\x18\x01 \x01(\x0c\x12\r\n\x05index\x18\x02 \x01(\x05\"/\n\rConvertedFile\x12\x10\n\x08\x66ilename\x18\x01 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x02 \x01(\x0c\"\x85\x01\n\x0eUploadResponse\x12+\n\x06status\x18\x01 \x01(\x0e\x32\x1b.file.UploadResponse.Status\x12\"\n\x05\x66iles\x18\x02 \x03(\x0b\x32\x13.file.ConvertedFile\"\"\n\x06Status\x12\x0b\n\x07SUCCESS\x10\x00\x12\x0b\n\x07\x46\x41ILURE\x10\x01\x32@\n\x0b\x46ileService\x12\x31\n\x06Upload\x12\x0f.file.FileChunk\x1a\x14.file.UploadResponse(\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -33,10 +33,12 @@ if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_FILECHUNK']._serialized_start=19
   _globals['_FILECHUNK']._serialized_end=59
-  _globals['_UPLOADRESPONSE']._serialized_start=61
-  _globals['_UPLOADRESPONSE']._serialized_end=158
-  _globals['_UPLOADRESPONSE_STATUS']._serialized_start=124
-  _globals['_UPLOADRESPONSE_STATUS']._serialized_end=158
-  _globals['_FILESERVICE']._serialized_start=160
-  _globals['_FILESERVICE']._serialized_end=224
+  _globals['_CONVERTEDFILE']._serialized_start=61
+  _globals['_CONVERTEDFILE']._serialized_end=108
+  _globals['_UPLOADRESPONSE']._serialized_start=111
+  _globals['_UPLOADRESPONSE']._serialized_end=244
+  _globals['_UPLOADRESPONSE_STATUS']._serialized_start=210
+  _globals['_UPLOADRESPONSE_STATUS']._serialized_end=244
+  _globals['_FILESERVICE']._serialized_start=246
+  _globals['_FILESERVICE']._serialized_end=310
 # @@protoc_insertion_point(module_scope)
