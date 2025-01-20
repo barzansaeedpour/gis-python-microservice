@@ -9,13 +9,15 @@ from shapely.affinity import translate, scale
 import os
 
 class FileService(dwg_pb2_grpc.FileServiceServicer):
-    def Upload(self, request_iterator, context):
+    def Upload(self, request, context):
         # Save the uploaded file
         file_path = 'input/file.dwg'
         with open(file_path, 'wb') as file:
-            for request in request_iterator:
-                file.write(request.data)
+            for chunk in request.chunks:
+                file.write(chunk.data)
         
+        params = request.params
+
         # Convert the DWG file
         INPUT_FOLDER = "./input/"
         OUTPUT_FOLDER = "./output"
@@ -33,30 +35,27 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         # Load the converted DXF file using GeoPandas
         data = gpd.read_file("./output/file.dxf")
         data['geom_type'] = data.geometry.type
-        data.set_crs(epsg=3857, inplace=True)
+        data.set_crs(epsg=params.epsg, inplace=True)
 
         # Calculate the bounding box and crop the data
-        bounding_box = data.total_bounds  # Returns (minx, miny, maxx, maxy)
-        print(f"Bounding Box: {bounding_box}")
-        bounding_box_polygon = box(637000, 3902000, 672000, 3919000)
+        bounding_box_polygon = box(params.bbox_min_x, params.bbox_min_y, params.bbox_max_x, params.bbox_max_y)
         cropped_data = data[data.geometry.intersects(bounding_box_polygon)]
 
-        # Translate the cropped data to the new center coordinates (5715364, 4261022)
+        # Translate the cropped data to the new center coordinates
         data_lines = cropped_data[cropped_data['geom_type'] == 'LineString']
         data_points = cropped_data[cropped_data['geom_type'] == 'Point']
 
-        current_center_x, current_center_y = (bounding_box[0] + bounding_box[2]) / 2, (bounding_box[1] + bounding_box[3]) / 2
-        new_center_x, new_center_y = 5715364, 4261022
+        current_center_x, current_center_y = (bounding_box_polygon.bounds[0] + bounding_box_polygon.bounds[2]) / 2, (bounding_box_polygon.bounds[1] + bounding_box_polygon.bounds[3]) / 2
+        new_center_x, new_center_y = params.new_center_x, params.new_center_y
         delta_x, delta_y = new_center_x - current_center_x, new_center_y - current_center_y
 
         data_lines['geometry'] = data_lines['geometry'].apply(lambda geom: translate(geom, xoff=delta_x, yoff=delta_y))
         data_points['geometry'] = data_points['geometry'].apply(lambda geom: translate(geom, xoff=delta_x, yoff=delta_y))
 
         # Scale the geometries around the new center
-        scale_factor = 3  # >1 for zooming in, <1 for zooming out
         center_point = Point(new_center_x, new_center_y)
-        data_lines['geometry'] = data_lines['geometry'].apply(lambda geom: scale(geom, xfact=scale_factor, yfact=scale_factor, origin=center_point))
-        data_points['geometry'] = data_points['geometry'].apply(lambda geom: scale(geom, xfact=scale_factor, yfact=scale_factor, origin=center_point))
+        data_lines['geometry'] = data_lines['geometry'].apply(lambda geom: scale(geom, xfact=params.scale_factor, yfact=params.scale_factor, origin=center_point))
+        data_points['geometry'] = data_points['geometry'].apply(lambda geom: scale(geom, xfact=params.scale_factor, yfact=params.scale_factor, origin=center_point))
 
         # Save the shapefiles
         data_lines.to_file("./output/cropped_lines.shp")

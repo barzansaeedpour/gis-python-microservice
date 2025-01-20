@@ -7,6 +7,17 @@ message FileChunk {
     int32 index = 2;
 }
 
+message Parameters {
+    int32 epsg = 1;
+    double new_center_x = 2;
+    double new_center_y = 3;
+    double bbox_min_x = 4;
+    double bbox_min_y = 5;
+    double bbox_max_x = 6;
+    double bbox_max_y = 7;
+    double scale_factor = 8;
+}
+
 message ConvertedFile {
     string filename = 1;
     bytes data = 2;
@@ -22,11 +33,10 @@ message UploadResponse {
 }
 
 service FileService {
-    rpc Upload(stream FileChunk) returns (UploadResponse);
+    rpc Upload(UploadRequest) returns (UploadResponse);
 }
 
-
-
-// python -m grpc_tools.protoc -I./protos --python_out=. --grpc_python_out=. protos/dwg.proto
-
-
+message UploadRequest {
+    Parameters params = 1;
+    repeated FileChunk chunks = 2;
+}

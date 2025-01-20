@@ -34,9 +34,9 @@ class FileServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Upload = channel.stream_unary(
+        self.Upload = channel.unary_unary(
                 '/file.FileService/Upload',
-                request_serializer=dwg__pb2.FileChunk.SerializeToString,
+                request_serializer=dwg__pb2.UploadRequest.SerializeToString,
                 response_deserializer=dwg__pb2.UploadResponse.FromString,
                 _registered_method=True)
 
@@ -44,7 +44,7 @@ class FileServiceStub(object):
 class FileServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def Upload(self, request_iterator, context):
+    def Upload(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,9 +53,9 @@ class FileServiceServicer(object):
 
 def add_FileServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Upload': grpc.stream_unary_rpc_method_handler(
+            'Upload': grpc.unary_unary_rpc_method_handler(
                     servicer.Upload,
-                    request_deserializer=dwg__pb2.FileChunk.FromString,
+                    request_deserializer=dwg__pb2.UploadRequest.FromString,
                     response_serializer=dwg__pb2.UploadResponse.SerializeToString,
             ),
     }
@@ -70,7 +70,7 @@ class FileService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def Upload(request_iterator,
+    def Upload(request,
             target,
             options=(),
             channel_credentials=None,
@@ -80,11 +80,11 @@ class FileService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_unary(
-            request_iterator,
+        return grpc.experimental.unary_unary(
+            request,
             target,
             '/file.FileService/Upload',
-            dwg__pb2.FileChunk.SerializeToString,
+            dwg__pb2.UploadRequest.SerializeToString,
             dwg__pb2.UploadResponse.FromString,
             options,
             channel_credentials,

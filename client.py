@@ -31,11 +31,24 @@ def send_file():
         ]
     )
     stub = dwg_pb2_grpc.FileServiceStub(channel)
-    response = stub.Upload(generate_file_chunks('./input/Khoroseh Var-Plan & Profile.dwg'))
+
+    params = dwg_pb2.Parameters(
+        epsg=3857,
+        new_center_x=5715364,
+        new_center_y=4261022,
+        bbox_min_x=637000,
+        bbox_min_y=3902000,
+        bbox_max_x=672000,
+        bbox_max_y=3919000,
+        scale_factor=10  # Add your scale factor here
+    )
+
+    chunks = list(generate_file_chunks('./input/Khoroseh Var-Plan & Profile.dwg'))
+
+    request = dwg_pb2.UploadRequest(params=params, chunks=chunks)
+    response = stub.Upload(request)
     print(f'Upload response: {response.status}')
     save_converted_files(response)
 
 if __name__ == '__main__':
     send_file()
-
-
