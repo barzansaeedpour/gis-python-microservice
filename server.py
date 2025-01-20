@@ -25,19 +25,7 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         RECURSIVE = "0"
         AUDIT = "1"
         INPUTFILTER = "*.DWG"
-        
-        # cmd = [TEIGHA_PATH, INPUT_FOLDER, OUTPUT_FOLDER, OUTVER, OUTFORMAT, RECURSIVE, AUDIT, INPUTFILTER]
-        # subprocess.run(cmd, shell=True)
-        # data = gpd.read_file("./output/file.dxf")
-        # data['geom_type'] = data.geometry.type
-        # data.set_crs(epsg=4326, inplace=True)
-        # bounding_box_polygon = box(637000, 3902000, 672000, 3919000)
-        # cropped_data = data[data.geometry.intersects(bounding_box_polygon)]
-        # data_lines = cropped_data[cropped_data['geom_type'] == 'LineString']
-        # data_points = cropped_data[cropped_data['geom_type'] == 'Point']
-        # data_lines.to_file("./output/cropped_lines.shp")
-        # data_points.to_file("./output/cropped_points.shp")
-        
+    
         # Convert DWG to DXF using ODA File Converter
         cmd = [TEIGHA_PATH, INPUT_FOLDER, OUTPUT_FOLDER, OUTVER, OUTFORMAT, RECURSIVE, AUDIT, INPUTFILTER]
         subprocess.run(cmd, shell=True)
@@ -71,8 +59,6 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         data_points['geometry'] = data_points['geometry'].apply(lambda geom: scale(geom, xfact=scale_factor, yfact=scale_factor, origin=center_point))
 
         # Save the shapefiles
-        # data_lines.to_file("./output/cropped_lines_stretched.shp")
-        # data_points.to_file("./output/cropped_points_stretched.shp")
         data_lines.to_file("./output/cropped_lines.shp")
         data_points.to_file("./output/cropped_points.shp")
         
