@@ -25,6 +25,7 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         RECURSIVE = "0"
         AUDIT = "1"
         INPUTFILTER = "*.DWG"
+        
         # cmd = [TEIGHA_PATH, INPUT_FOLDER, OUTPUT_FOLDER, OUTVER, OUTFORMAT, RECURSIVE, AUDIT, INPUTFILTER]
         # subprocess.run(cmd, shell=True)
         # data = gpd.read_file("./output/file.dxf")
@@ -42,7 +43,7 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         subprocess.run(cmd, shell=True)
 
         # Load the converted DXF file using GeoPandas
-        data = gpd.read_file("./output/Khoroseh Var-Plan & Profile.dxf")
+        data = gpd.read_file("./output/file.dxf")
         data['geom_type'] = data.geometry.type
         data.set_crs(epsg=3857, inplace=True)
 
@@ -74,8 +75,6 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         # data_points.to_file("./output/cropped_points_stretched.shp")
         data_lines.to_file("./output/cropped_lines.shp")
         data_points.to_file("./output/cropped_points.shp")
-        
-        
         
         # Gather the converted files
         file_names = [
