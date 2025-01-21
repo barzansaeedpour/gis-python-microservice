@@ -7,6 +7,7 @@ import geopandas as gpd
 from shapely.geometry import box, Point
 from shapely.affinity import translate, scale
 import os
+import time
 import pipes
 
 class FileService(dwg_pb2_grpc.FileServiceServicer):
@@ -48,49 +49,50 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         subprocess.call(cmdline, shell=True)
         
         print("ok4")
-        # Load the converted DXF file using GeoPandas
-        data = gpd.read_file("./output/file.dxf")
-        data['geom_type'] = data.geometry.type
-        data.set_crs(epsg=params.epsg, inplace=True)
+        time.sleep(20)
+        # # Load the converted DXF file using GeoPandas
+        # data = gpd.read_file("./output/file.dxf")
+        # data['geom_type'] = data.geometry.type
+        # data.set_crs(epsg=params.epsg, inplace=True)
 
-        print("ok5")
-        # Calculate the bounding box and crop the data
-        bounding_box_polygon = box(params.bbox_min_x, params.bbox_min_y, params.bbox_max_x, params.bbox_max_y)
-        cropped_data = data[data.geometry.intersects(bounding_box_polygon)]
+        # print("ok5")
+        # # Calculate the bounding box and crop the data
+        # bounding_box_polygon = box(params.bbox_min_x, params.bbox_min_y, params.bbox_max_x, params.bbox_max_y)
+        # cropped_data = data[data.geometry.intersects(bounding_box_polygon)]
 
-        # Translate the cropped data to the new center coordinates
-        data_lines = cropped_data[cropped_data['geom_type'] == 'LineString']
-        data_points = cropped_data[cropped_data['geom_type'] == 'Point']
+        # # Translate the cropped data to the new center coordinates
+        # data_lines = cropped_data[cropped_data['geom_type'] == 'LineString']
+        # data_points = cropped_data[cropped_data['geom_type'] == 'Point']
 
-        current_center_x, current_center_y = (bounding_box_polygon.bounds[0] + bounding_box_polygon.bounds[2]) / 2, (bounding_box_polygon.bounds[1] + bounding_box_polygon.bounds[3]) / 2
-        new_center_x, new_center_y = params.new_center_x, params.new_center_y
-        delta_x, delta_y = new_center_x - current_center_x, new_center_y - current_center_y
+        # current_center_x, current_center_y = (bounding_box_polygon.bounds[0] + bounding_box_polygon.bounds[2]) / 2, (bounding_box_polygon.bounds[1] + bounding_box_polygon.bounds[3]) / 2
+        # new_center_x, new_center_y = params.new_center_x, params.new_center_y
+        # delta_x, delta_y = new_center_x - current_center_x, new_center_y - current_center_y
 
-        data_lines['geometry'] = data_lines['geometry'].apply(lambda geom: translate(geom, xoff=delta_x, yoff=delta_y))
-        data_points['geometry'] = data_points['geometry'].apply(lambda geom: translate(geom, xoff=delta_x, yoff=delta_y))
+        # data_lines['geometry'] = data_lines['geometry'].apply(lambda geom: translate(geom, xoff=delta_x, yoff=delta_y))
+        # data_points['geometry'] = data_points['geometry'].apply(lambda geom: translate(geom, xoff=delta_x, yoff=delta_y))
 
-        # Scale the geometries around the new center
-        center_point = Point(new_center_x, new_center_y)
-        data_lines['geometry'] = data_lines['geometry'].apply(lambda geom: scale(geom, xfact=params.scale_factor, yfact=params.scale_factor, origin=center_point))
-        data_points['geometry'] = data_points['geometry'].apply(lambda geom: scale(geom, xfact=params.scale_factor, yfact=params.scale_factor, origin=center_point))
+        # # Scale the geometries around the new center
+        # center_point = Point(new_center_x, new_center_y)
+        # data_lines['geometry'] = data_lines['geometry'].apply(lambda geom: scale(geom, xfact=params.scale_factor, yfact=params.scale_factor, origin=center_point))
+        # data_points['geometry'] = data_points['geometry'].apply(lambda geom: scale(geom, xfact=params.scale_factor, yfact=params.scale_factor, origin=center_point))
 
-        # Save the shapefiles
-        data_lines.to_file("./output/cropped_lines.shp")
-        data_points.to_file("./output/cropped_points.shp")
+        # # Save the shapefiles
+        # data_lines.to_file("./output/cropped_lines.shp")
+        # data_points.to_file("./output/cropped_points.shp")
         
-        # Gather the converted files
-        file_names = [
-            "cropped_lines.cpg", "cropped_lines.dbf", "cropped_lines.prj", "cropped_lines.shp", "cropped_lines.shx",
-            "cropped_points.cpg", "cropped_points.dbf", "cropped_points.prj", "cropped_points.shp", "cropped_points.shx"
-        ]
+        # # Gather the converted files
+        # file_names = [
+        #     "cropped_lines.cpg", "cropped_lines.dbf", "cropped_lines.prj", "cropped_lines.shp", "cropped_lines.shx",
+        #     "cropped_points.cpg", "cropped_points.dbf", "cropped_points.prj", "cropped_points.shp", "cropped_points.shx"
+        # ]
         
-        converted_files = []
-        for file_name in file_names:
-            with open(f"./output/{file_name}", "rb") as f:
-                file_data = f.read()
-                converted_files.append(dwg_pb2.ConvertedFile(filename=file_name, data=file_data))
+        # converted_files = []
+        # for file_name in file_names:
+        #     with open(f"./output/{file_name}", "rb") as f:
+        #         file_data = f.read()
+        #         converted_files.append(dwg_pb2.ConvertedFile(filename=file_name, data=file_data))
         
-        return dwg_pb2.UploadResponse(status=dwg_pb2.UploadResponse.SUCCESS, files=converted_files)
+        # return dwg_pb2.UploadResponse(status=dwg_pb2.UploadResponse.SUCCESS, files=converted_files)
 
 def serve():
     server = grpc.server(
