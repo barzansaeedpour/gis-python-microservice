@@ -3,6 +3,8 @@ FROM ubuntu:20.04
 
 # Set environment variables to prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
+# Without this setting, Python never prints anything out.
+ENV PYTHONUNBUFFERED=1
 
 # # Install necessary packages
 # RUN apt-get update && \
@@ -34,4 +36,4 @@ CMD ["python3", "server.py"]
 
 
 # docker build -t odaconverter .
-# docker run -v "./input:/app/input" -v "./output:/app/output" odaconverter
+# docker run -p 50051:50051 -v "./input:/app/input" -v "./output:/app/output" odaconverter

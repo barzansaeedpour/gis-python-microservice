@@ -11,6 +11,7 @@ import pipes
 
 class FileService(dwg_pb2_grpc.FileServiceServicer):
     def Upload(self, request, context):
+        print("ok1")
         # Save the uploaded file
         file_path = 'input/file.dwg'
         with open(file_path, 'wb') as file:
@@ -18,7 +19,7 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
                 file.write(chunk.data)
         
         params = request.params
-
+        print("ok2")
         # Convert the DWG file
         # INPUT_FOLDER = "./input/"
         # OUTPUT_FOLDER = "./output"
@@ -41,15 +42,18 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         # Convert DWG to DXF using ODA File Converter
         # cmd = [TEIGHA_PATH, INPUT_FOLDER, OUTPUT_FOLDER, OUTVER, OUTFORMAT, RECURSIVE, AUDIT, INPUTFILTER]
         # subprocess.run(cmd, shell=True)
+        print("ok3")
         commandargs = [teigha, indir, outdir, "ACAD2000", "DXF", "0", "1", INPUTFILTER]
         cmdline = " ".join(map(pipes.quote, commandargs))
         subprocess.call(cmdline, shell=True)
         
+        print("ok4")
         # Load the converted DXF file using GeoPandas
         data = gpd.read_file("./output/file.dxf")
         data['geom_type'] = data.geometry.type
         data.set_crs(epsg=params.epsg, inplace=True)
 
+        print("ok5")
         # Calculate the bounding box and crop the data
         bounding_box_polygon = box(params.bbox_min_x, params.bbox_min_y, params.bbox_max_x, params.bbox_max_y)
         cropped_data = data[data.geometry.intersects(bounding_box_polygon)]
