@@ -7,6 +7,7 @@ import geopandas as gpd
 from shapely.geometry import box, Point
 from shapely.affinity import translate, scale
 import os
+import pipes
 
 class FileService(dwg_pb2_grpc.FileServiceServicer):
     def Upload(self, request, context):
@@ -19,19 +20,31 @@ class FileService(dwg_pb2_grpc.FileServiceServicer):
         params = request.params
 
         # Convert the DWG file
-        INPUT_FOLDER = "./input/"
-        OUTPUT_FOLDER = "./output"
-        TEIGHA_PATH = "C:/Program Files/ODA/ODAFileConverter 25.11.0/ODAFileConverter.exe"
+        # INPUT_FOLDER = "./input/"
+        # OUTPUT_FOLDER = "./output"
+        # TEIGHA_PATH = "C:/Program Files/ODA/ODAFileConverter 25.11.0/ODAFileConverter.exe"
+        # OUTVER = "ACAD2018"
+        # OUTFORMAT = "DXF"
+        # RECURSIVE = "0"
+        # AUDIT = "1"
+        # INPUTFILTER = "*.DWG"
+        indir = "./input/"
+        outdir = "./output"
+        teigha = "./ODAFileConverter_QT6_lnxX64_8.3dll_25.11.AppImage"
+        # TEIGHA_PATH = "C:/Program Files/ODA/ODAFileConverter 25.11.0/ODAFileConverter.exe"
         OUTVER = "ACAD2018"
         OUTFORMAT = "DXF"
         RECURSIVE = "0"
         AUDIT = "1"
         INPUTFILTER = "*.DWG"
-    
+        
         # Convert DWG to DXF using ODA File Converter
-        cmd = [TEIGHA_PATH, INPUT_FOLDER, OUTPUT_FOLDER, OUTVER, OUTFORMAT, RECURSIVE, AUDIT, INPUTFILTER]
-        subprocess.run(cmd, shell=True)
-
+        # cmd = [TEIGHA_PATH, INPUT_FOLDER, OUTPUT_FOLDER, OUTVER, OUTFORMAT, RECURSIVE, AUDIT, INPUTFILTER]
+        # subprocess.run(cmd, shell=True)
+        commandargs = [teigha, indir, outdir, "ACAD2000", "DXF", "0", "1", INPUTFILTER]
+        cmdline = " ".join(map(pipes.quote, commandargs))
+        subprocess.call(cmdline, shell=True)
+        
         # Load the converted DXF file using GeoPandas
         data = gpd.read_file("./output/file.dxf")
         data['geom_type'] = data.geometry.type
@@ -84,6 +97,7 @@ def serve():
         ]
     )
     dwg_pb2_grpc.add_FileServiceServicer_to_server(FileService(), server)
+    print("Server is running on port 50051...")
     server.add_insecure_port('[::]:50051')
     server.start()
     server.wait_for_termination()
