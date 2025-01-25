@@ -1,45 +1,39 @@
-# Use an appropriate base image
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
-# Set environment variables to prevent interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-# Without this setting, Python never prints anything out.
 ENV PYTHONUNBUFFERED=1
+ENV QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms/
+ENV XDG_RUNTIME_DIR=/tmp/runtime-root  
+ENV DISPLAY=:99                        
 
-# # Install necessary packages
-# RUN apt-get update && \
-#     apt-get install -y wget wine rpm && \
-#     rm -rf /var/lib/apt/lists/*
-# Install necessary packages
 WORKDIR /app
 COPY . /app/
 
-RUN apt-get update
-RUN apt-get install fuse libfuse2
-RUN apt-get install libglu1-mesa:i386
-RUN apt-get install -y python3 python3-pip
-RUN python3 -m pip install --upgrade pip
-RUN pip install -r requirements.txt
-EXPOSE 50051
-# # Copy the ODA File Converter RPM to the container
-# COPY ODAFileConverter_QT6_lnxX64_8.3dll_25.11.AppImage /app/
+# Install dependencies
+RUN dpkg --add-architecture i386 && \
+    apt-get update && apt-get install -y \
+    wget \
+    xvfb \
+    gdebi-core \
+    libxcb-util1 \
+    libxkbcommon-x11-0 \
+    libfontconfig1 \
+    libfontconfig1:i386 \
+    libx11-xcb1 \
+    libxcb-cursor0 \
+    libqt5gui5 \
+    libqt5core5a \
+    && gdebi -n /app/ODAFileConverter_QT6_lnxX64_8.3dll_25.11.deb \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install ODA File Converter using rpm
-# RUN rpm --install --nodeps /tmp/ODAFileConverter_QT6_lnxX64_8.3dll_25.11.rpm
-# RUN apt-get install /app/
+# Fix library compatibility
+RUN ln -s /usr/lib/x86_64-linux-gnu/libxcb-util.so.1 /usr/lib/x86_64-linux-gnu/libxcb-util.so.0
 
-# Set working directory
-
-# Copy input files and script to the container
-
-# Run the conversion script
-# CMD ["wine", "python3", "convert.py"]
-CMD ["python3", "server.py"]
-
-
-# docker build -t odaconverter .
-# docker run -p 50051:50051 -v "./input:/app/input" -v "./output:/app/output" odaconverter
-
-
-# sudo apt-get install libglu1-mesa:i386
-# docker run -p 50051:50051 -v "./input:/app/input" -v "./output:/app/output" --privileged --cap-add=SYS_ADMIN --device /dev/fuse -it odaconverter
+# # Create runtime directory and test
+# RUN mkdir -p ${XDG_RUNTIME_DIR} && chmod 700 ${XDG_RUNTIME_DIR} \
+#     && xvfb-run -a -s "-screen 0 1280x1024x24" ODAFileConverter --version
+# Create runtime directory and test with proper Xvfb cleanup
+RUN mkdir -p ${XDG_RUNTIME_DIR} && chmod 700 ${XDG_RUNTIME_DIR} \
+    && { Xvfb :99 -screen 0 1280x1024x24 -ac 2>/dev/null & } \
+    && sleep 2 \
+    && DISPLAY=:99 ODAFileConverter --version \
+    && killall Xvfb
