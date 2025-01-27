@@ -34,13 +34,13 @@ def send_file():
 
     params = dwg_pb2.Parameters(
         epsg=3857,
-        new_center_x=4940573,
-        new_center_y=3937659,
+        new_center_x=6632484,
+        new_center_y=4343373,
         bbox_min_x=637000,
         bbox_min_y=3902000,
         bbox_max_x=672000,
         bbox_max_y=3919000,
-        scale_factor=100  # Add your scale factor here
+        scale_factor=5  # Add your scale factor here
     )
 
     chunks = list(generate_file_chunks('./input/Khoroseh Var-Plan & Profile.dwg'))
